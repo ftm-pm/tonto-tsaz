@@ -5,13 +5,13 @@ const config = {
   entry: './src/app.ts',
   output: {
     path: path.resolve(__dirname, 'dev'),
-    filename: 'bundle.js'
+    filename: 'dev/bundle.js'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
   },
   devServer: {
-    contentBase: path.join(__dirname, 'dev'),
+    contentBase: path.join(__dirname, './'),
     compress: true,
     port: 8080
   },

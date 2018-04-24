@@ -6,6 +6,7 @@
   "description": "Port library AZ.js on TypeScript",
   "main": "index.js",
   "dependencies": {
+    "rxjs": "^5.5.10",
     "underscore": "^1.9.0"
   },
   "devDependencies": {

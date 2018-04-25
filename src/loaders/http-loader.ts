@@ -7,7 +7,7 @@ import { _throw } from 'rxjs/observable/throw';
 import { map } from 'rxjs/operators';
 
 import { AjaxRequest, AjaxResponse } from 'rxjs/Rx';
-import { DICTIONARY_TYPE } from '../dictonaries/dictonary';
+import { Dictionary, DICTIONARY_FILE_TYPE } from '../dictonaries/dictonary';
 import { DAWG } from './dawg';
 
 /**
@@ -24,7 +24,7 @@ export class HttpLoader implements Loader {
   /**
    * @inheritDoc
    */
-  public load(options: HttpLoaderConfig = <HttpLoaderConfig> {method: 'GET'}): Observable<AjaxResponse> {
+  public load(options: HttpLoaderConfig = <HttpLoaderConfig> {method: 'GET'}): Observable<Dictionary> {
     if (!options.hasOwnProperty('url')) {
       return _throw('Path is empty');
     }
@@ -37,7 +37,7 @@ export class HttpLoader implements Loader {
 
     return ajax(options)
       .pipe(map((response: AjaxResponse) => {
-          if (options.type === DICTIONARY_TYPE.DAWG) {
+          if (options.fileType === DICTIONARY_FILE_TYPE.DAWG) {
             // const ab: ArrayBuffer = new ArrayBuffer(response.response.length);
             // const view: Uint8Array = new Uint8Array(ab);
             // for (let i = 0; i < response.response.length; ++i) {
@@ -46,8 +46,9 @@ export class HttpLoader implements Loader {
             // response.response = ab;
             response.response = DAWG.createDAWGfromArrayBuffer(response.response, options.format);
           }
+          options['data'] = response.response;
 
-          return response;
+          return <Dictionary> options;
         })
       );
   }

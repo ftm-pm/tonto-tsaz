@@ -1,12 +1,13 @@
 // App root
+import { Morph, MorphInterface } from './morph/morph';
 
-import { DictionaryManager, DictionaryManagerInterface } from './dictonaries/dictionary-manager';
-
-const manager: DictionaryManagerInterface = new DictionaryManager({
-  useLoader: 'http'
+const morph: MorphInterface = new Morph({
+  dictionary: {
+    useLoader: 'http'
+  }
 });
 
-manager.loads().subscribe(resp => {
+morph.init().subscribe(resp => {
   console.log(resp);
 }, error => {
   console.log(error);

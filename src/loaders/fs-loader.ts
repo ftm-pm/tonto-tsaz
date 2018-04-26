@@ -16,9 +16,6 @@ import { Dictionary } from '../dictonaries/dictonary';
  * FSLoader
  */
 export class FSLoader implements Loader {
-  /**
-   * @inheritDoc
-   */
   public load(options: LoaderConfig = <LoaderConfig> {}): Observable<Dictionary> {
     return;
   }

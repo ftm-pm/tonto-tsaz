@@ -1,5 +1,5 @@
 # TSAZ 
-Port library AZ.js on TypeScript
+Port AZ.js in TypeScript
 
 ## Feedback
 

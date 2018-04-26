@@ -505,7 +505,7 @@ export class DAWG {
   //    extra letters (свлово -> слово)
   //    missing letters (сово -> слово)
   //    wrong letters (сково -> слово)
-  public findAll(str: string, replaces, mstutter: number, mtypos: number) {
+  public findAll(str: string, replaces ?: any, mstutter ?: number, mtypos ?: number) {
     mtypos = mtypos || 0;
     mstutter = mstutter || 0;
     const results: any[] = [];

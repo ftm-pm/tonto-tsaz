@@ -21,9 +21,6 @@ export interface HttpLoaderConfig extends LoaderConfig, AjaxRequest {
  * HttpLoader
  */
 export class HttpLoader implements Loader {
-  /**
-   * @inheritDoc
-   */
   public load(options: HttpLoaderConfig = <HttpLoaderConfig> {method: 'GET'}): Observable<Dictionary> {
     if (!options.hasOwnProperty('url')) {
       return _throw('Path is empty');

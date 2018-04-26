@@ -16,13 +16,45 @@
     "object-literal-sort-keys": false,
     "object-literal-key-quotes": false,
     "object-literal-shorthand": false,
-    "array-type": [true, "array"],
+    "array-type": [
+      true,
+      "array"
+    ],
     "no-angle-bracket-type-assertion": false,
     "trailing-comma": false,
     "no-string-literal": false,
-    "max-line-length": [true, 140],
-    "arrow-parens": [true, "ban-single-arg-parens"],
-    "no-bitwise": false
+    "max-line-length": [
+      true,
+      140
+    ],
+    "arrow-parens": [
+      true,
+      "ban-single-arg-parens"
+    ],
+    "no-bitwise": false,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "public-static-field",
+          "public-instance-field",
+          "private-instance-field",
+          "public-constructor",
+          "private-static-field",
+          "private-constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ]
+      }
+    ],
+    "no-console": [true, "log", "error"]
   },
   "rulesDirectory": []
 }

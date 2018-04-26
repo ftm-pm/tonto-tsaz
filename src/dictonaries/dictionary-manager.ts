@@ -7,15 +7,16 @@ import { _throw } from 'rxjs/observable/throw';
 import { Loader, RESPONSE_TYPE } from '../loaders/loader';
 import { Dictionary, DICTIONARY_FILE_TYPE, DICTIONARY_TYPE, DictionaryInterface } from './dictonary';
 
-import { DAWG, DAWG_FORMAT } from '../loaders/dawg';
+import { DAWG_FORMAT } from '../loaders/dawg';
 import { FSLoader } from '../loaders/fs-loader';
 import { HttpLoader } from '../loaders/http-loader';
+import { Thesaurus, ThesaurusInterface } from './thesaurus';
 
 /**
  * DictionaryManagerInterface
  */
 export interface DictionaryManagerInterface {
-  loads(): Observable<Thesaurus>;
+  loads(): Observable<ThesaurusInterface>;
 }
 
 /**
@@ -25,20 +26,6 @@ export interface DictionaryManagerConfig {
   loader?: Loader;
   useLoader?: string;
   dictionaries?: Dictionary[];
-}
-
-/**
- * Thesaurus
- */
-export interface Thesaurus {
-  words: DAWG;
-  predictionSuffixes: DAWG[];
-  probabilities: DAWG;
-  grammemes: Grammeme[];
-  tagsInt: string[];
-  tagsExpr: string[];
-  suffixes: string[];
-  paradigms: Uint16Array[];
 }
 
 /**
@@ -176,10 +163,7 @@ export class DictionaryManager implements DictionaryManagerInterface {
     ];
   }
 
-  /**
-   * @inheritDoc
-   */
-  public loads(): Observable<Thesaurus> {
+  public loads(): Observable<ThesaurusInterface> {
     if (!this.loader) {
       return _throw('Loader is undefind');
     }
@@ -187,7 +171,7 @@ export class DictionaryManager implements DictionaryManagerInterface {
 
     return combineLatest(dicts).pipe(map((dictionaries: Dictionary[]) => {
         this.dictionaries = dictionaries;
-        const dictonaryResponse: Thesaurus = <Thesaurus> {};
+        const dictonaryResponse: ThesaurusInterface = new Thesaurus();
         dictionaries.forEach(dictonary => {
           const data: any = dictonary.getData();
           switch (dictonary.type) {

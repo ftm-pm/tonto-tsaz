@@ -39,29 +39,14 @@ export enum DICTIONARY_TYPE {
  * Dictionary
  */
 export class Dictionary implements DictionaryInterface {
-  /**
-   * @inheritDoc
-   */
   public url: string;
 
-  /**
-   * @inheritDoc
-   */
   public responseType: string;
 
-  /**
-   * @inheritDoc
-   */
   public fileType: DICTIONARY_FILE_TYPE;
 
-  /**
-   * @inheritDoc
-   */
   public format ?: DAWG_FORMAT;
 
-  /**
-   * @inheritDoc
-   */
   public type: DICTIONARY_TYPE;
 
   /**
@@ -74,11 +59,8 @@ export class Dictionary implements DictionaryInterface {
    * @param {DictionaryInterface} config
    */
   public constructor(config: any = {}) {
-    for (const key of Object.keys(config)) {
-      this[key] = config[key];
-    }
+    Object.assign(this, config);
   }
-
 
   public getUrl(): string {
     return this.url;
@@ -120,9 +102,6 @@ export class Dictionary implements DictionaryInterface {
     this.type = value;
   }
 
-  /**
-   * @inheritDoc
-   */
   public getData(): any {
     return this.data;
   }

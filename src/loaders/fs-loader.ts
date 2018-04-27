@@ -1,10 +1,8 @@
 import * as fs from 'fs';
-
 import { Observable } from 'rxjs/Observable';
 
-import { Loader, LoaderConfig } from './loader';
-
 import { Dictionary } from '../dictonaries/dictonary';
+import { Loader, LoaderConfig } from './loader';
 
 /**
  * HttpLoaderConfig

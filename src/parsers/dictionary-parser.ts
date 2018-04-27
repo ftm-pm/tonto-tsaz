@@ -1,6 +1,6 @@
 import { DAWG } from '../loaders/dawg';
-import { getDictionaryScore, lookup } from '../utils/utils';
-import { DictionaryParse, DictionaryParseConfig } from './dictionary-parse';
+import { lookup } from '../utils/utils';
+import { DictionaryParse } from './dictionary-parse';
 import { ParserInterface } from './parser';
 import { Tag } from './tag';
 
@@ -54,10 +54,10 @@ export class DictionaryParser implements ParserInterface {
     const opts = lookup(this.words, word, config);
 
     const parses: DictionaryParse[] = [];
-    for (const i of opts) {
-      for (const j of opts[i]) {
-        const dictornaryParse: DictionaryParse = this.createDictionaryParse(
-          opts[i][0], opts[i][1][j][0], opts[i][1][j][1], opts[i][2], opts[i][3]);
+    for (const opt of opts) {
+      for (const j of Object.keys(opt)) {
+        const dictornaryParse: DictionaryParse = DictionaryParse.createDictionaryParse(
+          this.paradigms, this.tags, opt[0], opt[1][j][0], opt[1][j][1], opt[2], opt[3]);
         if (config.ignoreCase || !dictornaryParse.tag.isCapitalized() || isCapitalized) {
           parses.push(dictornaryParse);
         }
@@ -65,24 +65,5 @@ export class DictionaryParser implements ParserInterface {
     }
 
     return parses;
-  }
-
-  public createDictionaryParse(word: string, paradigmIdx, formIdx, stutterCnt: number,
-                               typosCnt: number = 0, prefix: string = '', suffix: string = ''): DictionaryParse {
-    const formCnt: number = this.paradigms.length / 3;
-    const paradigm: any = this.paradigms[paradigmIdx];
-    const config: DictionaryParseConfig = <DictionaryParseConfig> {
-      word: word,
-      paradigmIdx: paradigmIdx,
-      paradigm: paradigm,
-      formIdx: formIdx,
-      formCnt: formCnt,
-      tag: this.tags[paradigm[formCnt + formIdx]],
-      score: getDictionaryScore(stutterCnt, typosCnt),
-      prefix: prefix,
-      suffix: suffix
-    };
-
-    return new DictionaryParse(config);
   }
 }

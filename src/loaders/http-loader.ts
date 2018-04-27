@@ -1,14 +1,12 @@
-import { Loader, LoaderConfig } from './loader';
-
 import { Observable } from 'rxjs/observable';
 import { ajax } from 'rxjs/observable/dom/ajax';
-
 import { _throw } from 'rxjs/observable/throw';
 import { map } from 'rxjs/operators';
-
 import { AjaxRequest, AjaxResponse } from 'rxjs/Rx';
+
 import { Dictionary, DICTIONARY_FILE_TYPE } from '../dictonaries/dictonary';
 import { DAWG } from './dawg';
+import { Loader, LoaderConfig } from './loader';
 
 /**
  * HttpLoaderConfig

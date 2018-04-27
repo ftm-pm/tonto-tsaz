@@ -589,9 +589,9 @@ export class DAWG {
         const possible = this.COMMON_TYPOS[str[len]];
         if (possible) {
           for (const char of possible) {
-            const code = char.charCodeAt(0);
-            if (code in this.CP1251) {
-              cur = this.followByte(this.CP1251[code], index);
+            const charCode = char.charCodeAt(0);
+            if (charCode in this.CP1251) {
+              cur = this.followByte(this.CP1251[charCode], index);
               if (cur !== this.MISSING) {
                 // for missing letter we need to iterate all childs, not only COMMON_TYPOS
                 // prefixes.push([ prefix + possible[i], len, typos + 1, stutter, cur ]);
@@ -634,7 +634,7 @@ export class DAWG {
               len++;
             } else
             // Follow a stutter with a dash (д-да)
-            if (len < str.length - 2 && str[len + 1] == '-' && str[len] == str[len + 2]) {
+            if (len < str.length - 2 && str[len + 1] === '-' && str[len] === str[len + 2]) {
               prefixes.push([ prefix + str[len], len + 3, typos, stutter + 1, cur ]);
               len += 2;
             } else {

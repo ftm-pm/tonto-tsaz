@@ -1,8 +1,7 @@
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators/map';
-
 import { of } from 'rxjs/observable/of';
 import { _throw } from 'rxjs/observable/throw';
+import { map } from 'rxjs/operators/map';
 
 import {
   DictionaryManager,
@@ -10,11 +9,16 @@ import {
   DictionaryManagerInterface
 } from '../dictonaries/dictionary-manager';
 import { ThesaurusInterface } from '../dictonaries/thesaurus';
+import { AbbrParser } from '../parsers/abbr-parser';
 import { DictionaryParser } from '../parsers/dictionary-parser';
+import { InitialsParser } from '../parsers/initials-parser';
 import { Parse } from '../parsers/parse';
 import { ParserConfig, ParserInterface } from '../parsers/parser';
+import { RegexpParser } from '../parsers/regexp-parser';
 import { Tag } from '../parsers/tag';
 import { deepFreeze, getDictionaryScore } from '../utils/utils';
+import { HyphenParticle } from '../parsers/hyphen-particle';
+import { HyphenAdverb } from '../parsers/hyphen-adverb';
 
 /**
  * MorphInterface
@@ -24,23 +28,6 @@ export interface MorphInterface {
    * @returns {boolean}
    */
   init(): Observable<any>;
-
-  /**
-   * Create tag
-   *
-   * @param {string} lexeme
-   * @returns {Tag}
-   */
-  createTag(lexeme: string): Tag;
-
-  /**
-   * Make tag
-   *
-   * @param {string} tagInt
-   * @param {string} tagExt
-   * @returns {any}
-   */
-  makeTag(tagInt: string, tagExt: string): any;
 
   /**
    * Parse word
@@ -120,9 +107,9 @@ export class Morph implements MorphInterface {
         const tags: Tag[] = [];
         const tagsInt = this.thesaurus.tagsInt;
         const tagsExt = this.thesaurus.tagsExpr;
-        for (const key of tagsInt) {
-          tags[key] = this.createTag(tagsInt[key]);
-          tags[key].ext = this.createTag(tagsExt[key]);
+        for (const key of Object.keys(tagsInt)) {
+          tags[key] = Tag.createTag(key, this.thesaurus.grammemes);
+          tags[key].ext = Tag.createTag(key, this.thesaurus.grammemes);
         }
         this.tags = deepFreeze(tags);
 
@@ -132,41 +119,6 @@ export class Morph implements MorphInterface {
         return thesaurus;
       })
     );
-  }
-
-  public createTag(word: string): Tag {
-    const tag: Tag = new Tag();
-    let par;
-    const pair = word.split(' ');
-    tag.stat = pair[0].split(',');
-    tag.flex = pair[1] ? pair[1].split(',') : [];
-
-    for (const j of [0, 1]) {
-      const grams = tag.getGrams(j);
-      for (const i of Object.keys(grams)) {
-        let gram = grams[i];
-        tag.gram = true;
-        // loc2 -> loct -> CAse
-        while (this.thesaurus.grammemes[gram] && this.thesaurus.grammemes[gram].parent) {
-          par = this.thesaurus.grammemes[gram].parent;
-          tag[par] = gram;
-          gram = par;
-        }
-      }
-    }
-
-    if ('POST' in tag) {
-      tag.POS = tag.POST;
-    }
-
-    return tag;
-  }
-
-  public makeTag(tagInt: string, tagExt: string): any {
-    const tag = this.createTag(tagInt);
-    tag.ext = this.createTag(tagExt);
-
-    return deepFreeze(tag);
   }
 
   public parse(word: string, config ?: ParserConfig): Observable<any[]> {
@@ -182,20 +134,20 @@ export class Morph implements MorphInterface {
     let parses: any[] = [];
     let matched = false;
 
-    for (const key of config.parsers) {
-      let name = config.parsers[key];
+    for (const parse of config.parsers) {
+      let name = parse;
       const terminal = name[name.length - 1] !== '?';
       name = terminal ? name : name.slice(0, -1);
       if (name in this.parsers) {
-        const vars = this.parsers[name].parse(word, config);
-        for (const j of vars) {
-          vars[j].parser = name;
-          if (!vars[j].stutterCnt && !vars[j].typosCnt) {
+        const allParses = this.parsers[name].parse(word, config);
+        for (const parseVar of allParses) {
+          parseVar.parser = name;
+          if (!parseVar.stutterCnt && !parseVar.typosCnt) {
             matched = true;
           }
         }
 
-        parses = parses.concat(vars);
+        parses = parses.concat(allParses);
         if (matched && terminal) {
           break;
         }
@@ -209,12 +161,12 @@ export class Morph implements MorphInterface {
     }
 
     let total = 0;
-    for (const key of parses) {
-      if (parses[key].parser === 'Dictionary') {
-        const res = this.thesaurus.probabilities.findAll(parses[key] + ':' + parses[key].tag);
+    for (const parse of parses) {
+      if (parse.parser === 'Dictionary') {
+        const res = this.thesaurus.probabilities.findAll(parse + ':' + parse.tag);
         if (res && res[0]) {
-          parses[key].score = (res[0][1] / 1000000) * getDictionaryScore(parses[key].stutterCnt, parses[key].typosCnt);
-          total += parses[key].score;
+          parse.score = (res[0][1] / 1000000) * getDictionaryScore(parse.stutterCnt, parse.typosCnt);
+          total += parse.score;
         }
       }
     }
@@ -222,23 +174,23 @@ export class Morph implements MorphInterface {
     // Normalize Dictionary & non-Dictionary scores separately
     if (config.normalizeScore) {
       if (total > 0) {
-        for (const key of parses) {
-          if (parses[key].parser === 'Dictionary') {
-            parses[key].score /= total;
+        for (const parse of parses) {
+          if (parse.parser === 'Dictionary') {
+            parse.score /= total;
           }
         }
       }
 
       total = 0;
-      for (const key of parses) {
-        if (parses[key].parser !== 'Dictionary') {
-          total += parses[key].score;
+      for (const parse of parses) {
+        if (parse.parser !== 'Dictionary') {
+          total += parse.score;
         }
       }
       if (total > 0) {
-        for (const key of parses) {
-          if (parses[key].parser !==  'Dictionary') {
-            parses[key].score /= total;
+        for (const parse of parses) {
+          if (parse.parser !==  'Dictionary') {
+            parse.score /= total;
           }
         }
       }
@@ -255,7 +207,25 @@ export class Morph implements MorphInterface {
    * Init parsers
    */
   private initParsers(): void {
-    // console.log();
     this.parsers.dictonary = new DictionaryParser(this.thesaurus.words, this.thesaurus.paradigms, this.tags);
+    this.parsers.abbr = new AbbrParser(this.thesaurus.grammemes);
+    this.parsers.abbrName = new InitialsParser(this.thesaurus.grammemes, false, 0.1);
+    this.parsers.abbrPatronymic = new InitialsParser(this.thesaurus.grammemes, true, 0.1)
+
+    this.parsers.intNumber = new RegexpParser(/^[−-]?[0-9]+$/,
+      Tag.makeTag('NUMB,intg', 'ЧИСЛО,цел', this.thesaurus.grammemes), 0.9);
+    this.parsers.realNumber = new RegexpParser(/^[−-]?([0-9]*[.,][0-9]+)$/,
+      Tag.makeTag('NUMB,real', 'ЧИСЛО,вещ', this.thesaurus.grammemes), 0.9);
+    this.parsers.punctuation = new RegexpParser(/^[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]+$/,
+      Tag.makeTag('PNCT', 'ЗПР', this.thesaurus.grammemes), 0.9);
+    this.parsers.romanNumber = new RegexpParser(
+      /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/,
+      Tag.makeTag('ROMN', 'РИМ', this.thesaurus.grammemes), 0.9);
+    this.parsers.latin = new RegexpParser(
+      /[A-Za-z\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u024f]$/,
+      Tag.makeTag('LATN', 'ЛАТ', this.thesaurus.grammemes), 0.9);
+
+    this.parsers.hyphenParticle = new HyphenParticle(this.thesaurus.words, this.thesaurus.paradigms, this.tags);
+    this.parsers.hyphenAdverb = new HyphenAdverb(this.thesaurus.words, this.thesaurus.paradigms, this.tags, this.thesaurus.grammemes);
   }
 }

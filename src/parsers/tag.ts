@@ -1,9 +1,7 @@
+import { deepFreeze } from '../utils/utils';
 import { Parse } from './parse';
 
-/**
- * TagInterface
- */
-export interface TagInterface {
+export interface TagConfig {
   /**
    * Полный список неизменяемых граммем.
    */
@@ -23,7 +21,12 @@ export interface TagInterface {
    * Копия тега с русскими обозначениями (по версии OpenCorpora).
    */
   ext: TagInterface;
+}
 
+/**
+ * TagInterface
+ */
+export interface TagInterface extends TagConfig {
   /**
    * Возвращает текстовое представление тега.
    *
@@ -121,6 +124,40 @@ export class Tag implements TagInterface {
   public CAse: any;
   public femn: any;
 
+  public static createTag(word: string, grammemes: any[]): Tag {
+    const tag: Tag = new Tag();
+    // let par;
+    const pair = word.split(' ');
+    tag.stat = pair[0].split(',');
+    tag.flex = pair[1] ? pair[1].split(',') : [];
+
+    for (const index of [0, 1]) {
+      const grams = tag.getGrams(index);
+      for (let gram of grams) {
+        tag.gram = true;
+        // loc2 -> loct -> CAse
+        while (grammemes[gram] && grammemes[gram].parent) {
+          const par = grammemes[gram].parent;
+          tag[par] = gram;
+          gram = par;
+        }
+      }
+    }
+
+    if ('POST' in tag) {
+      tag.POS = tag.POST;
+    }
+
+    return tag;
+  }
+
+  public static makeTag(tagInt: string, tagExt: string, grammemes: any[]): Tag {
+    const tag: TagInterface = Tag.createTag(tagInt, grammemes);
+    tag.ext = Tag.createTag(tagExt, grammemes);
+
+    return deepFreeze(tag);
+  }
+
   public toString(): string {
     return `${this.stat.join(',')} ${this.flex.join(',')}`.trim();
   }
@@ -134,14 +171,14 @@ export class Tag implements TagInterface {
     if (!grammemes) {
       if (Object.prototype.toString.call(tag) === '[object Array]') {
         for (const key in tag) {
-          if (!this[tag[key]]) {
+          if (!this.hasOwnProperty(tag[key])) {
             return false;
           }
         }
         return true;
       } else {
         // Match to map
-        for (const key in tag) {
+        for (const key of Object.keys(tag)) {
           if (Object.prototype.toString.call(tag[key]) === '[object Array]') {
             if (!tag[key].indexOf(this[key])) {
               return false;

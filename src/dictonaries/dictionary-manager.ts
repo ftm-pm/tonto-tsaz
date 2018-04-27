@@ -1,15 +1,13 @@
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map } from 'rxjs/operators';
-
 import { _throw } from 'rxjs/observable/throw';
-
-import { Loader, RESPONSE_TYPE } from '../loaders/loader';
-import { Dictionary, DICTIONARY_FILE_TYPE, DICTIONARY_TYPE, DictionaryInterface } from './dictonary';
+import { map } from 'rxjs/operators';
 
 import { DAWG_FORMAT } from '../loaders/dawg';
 import { FSLoader } from '../loaders/fs-loader';
 import { HttpLoader } from '../loaders/http-loader';
+import { Loader, RESPONSE_TYPE } from '../loaders/loader';
+import { Dictionary, DICTIONARY_FILE_TYPE, DICTIONARY_TYPE, DictionaryInterface } from './dictonary';
 import { Thesaurus, ThesaurusInterface } from './thesaurus';
 
 /**
@@ -199,6 +197,13 @@ export class DictionaryManager implements DictionaryManagerInterface {
                   externalFull: data[key][3]
                 };
               }
+              // Another knowledge
+              const gram = { parent: 'POST' };
+              const grammemesList: string[] = ['NUMB', 'ЧИСЛО', 'ROMN', 'РИМ', 'LATN', 'ЛАТ', 'PNCT', 'ЗПР', 'UNKN', 'НЕИЗВ' ];
+              for (const key of grammemesList) {
+                dictonaryResponse.grammemes[key] = gram;
+              }
+
               break;
             case DICTIONARY_TYPE.TAGS_INT:
               dictonaryResponse.tagsInt = data;

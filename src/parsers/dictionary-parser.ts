@@ -24,6 +24,11 @@ export class DictionaryParser implements ParserInterface {
   private readonly tags: Tag[];
 
   /**
+   * Suffixes
+   */
+  private readonly suffixes: any[];
+
+  /**
    * Is capitalized
    *
    * @param {string} word
@@ -39,13 +44,15 @@ export class DictionaryParser implements ParserInterface {
    * Constructor DictionaryParser
    *
    * @param {DAWG} words
-   * @param {any} paradigms
+   * @param paradigms
    * @param {Tag[]} tags
+   * @param {any[]} suffixes
    */
-  public constructor(words: DAWG, paradigms: any, tags: Tag[]) {
+  public constructor(words: DAWG, paradigms: any, tags: Tag[], suffixes: any[]) {
     this.words = words;
     this.paradigms = paradigms;
     this.tags = tags;
+    this.suffixes = suffixes;
   }
 
   public parse(word: string, config: any): any {
@@ -57,7 +64,7 @@ export class DictionaryParser implements ParserInterface {
     for (const opt of opts) {
       for (const j of Object.keys(opt)) {
         const dictornaryParse: DictionaryParse = DictionaryParse.createDictionaryParse(
-          this.paradigms, this.tags, opt[0], opt[1][j][0], opt[1][j][1], opt[2], opt[3]);
+          this.paradigms, this.tags, this.suffixes, opt[0], opt[1][j][0], opt[1][j][1], opt[2], opt[3]);
         if (config.ignoreCase || !dictornaryParse.tag.isCapitalized() || isCapitalized) {
           parses.push(dictornaryParse);
         }

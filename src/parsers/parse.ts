@@ -30,7 +30,7 @@ export interface ParseConfig {
 /**
  * ParseInterface
  */
-export interface ParseInterface {
+export interface ParseInterface extends ParseConfig {
   /**
    * Приводит слово к его начальной форме.
    *
@@ -98,7 +98,7 @@ export interface ParseInterface {
  * @property {number} stutterCnt Число «заиканий», исправленных в слове.
  * @property {number} typosCnt Число опечаток, исправленных в слове.
  */
-export class Parse implements ParseConfig, ParseInterface {
+export class Parse implements ParseInterface {
   public word: string;
 
   public tag: Tag;

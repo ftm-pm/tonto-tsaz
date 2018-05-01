@@ -10,7 +10,10 @@ import { Tag } from './tag';
  * 'по-' + прилагательное в дательном падеже: "по-западному"
  */
 export class HyphenAdverb implements ParserInterface {
-  private ADVB: Tag;
+  /**
+   * ADVB
+   */
+  private readonly ADVB: Tag;
 
   /**
    * Words
@@ -33,18 +36,25 @@ export class HyphenAdverb implements ParserInterface {
   private readonly grammemes: any[];
 
   /**
+   * Suffixes
+   */
+  private readonly suffixes: any[];
+
+  /**
    * Constructor HyphenAdverb
    *
    * @param {DAWG} words
    * @param paradigms
    * @param {Tag[]} tags
    * @param {any[]} grammemes
+   * @param {any[]} suffixes
    */
-  public constructor(words: DAWG, paradigms: any, tags: Tag[], grammemes: any[]) {
+  public constructor(words: DAWG, paradigms: any, tags: Tag[], grammemes: any[], suffixes: any[]) {
     this.words = words;
     this.paradigms = paradigms;
     this.tags = tags;
     this.grammemes = grammemes;
+    this.suffixes = suffixes;
 
     this.ADVB = Tag.makeTag('ADVB', 'Н', this.grammemes);
   }
@@ -63,7 +73,8 @@ export class HyphenAdverb implements ParserInterface {
     for (const opt of opts) {
       if (!used[opt[0]]) {
         for (const opt1 of opt[1]) {
-          const dictParse = DictionaryParse.createDictionaryParse(this.paradigms, this.tags, opt[0], opt1[0], opt1[1], opt[2], opt[3]);
+          const dictParse = DictionaryParse.createDictionaryParse(this.paradigms, this.tags, this.suffixes,
+            opt[0], opt1[0], opt1[1], opt[2], opt[3]);
           if (dictParse.matches(['ADJF', 'sing', 'datv'])) {
             used[opt[0]] = true;
 

@@ -19,6 +19,10 @@ import { Tag } from '../parsers/tag';
 import { deepFreeze, getDictionaryScore } from '../utils/utils';
 import { HyphenParticle } from '../parsers/hyphen-particle';
 import { HyphenAdverb } from '../parsers/hyphen-adverb';
+import { HyphenWords } from '../parsers/hyphen-words';
+import { PrefixKnown } from '../parsers/prefix-known';
+import { PrefixUnknown } from '../parsers/prefix-unknown';
+import { SuffixKnown } from '../parsers/suffix-known';
 
 /**
  * MorphInterface
@@ -207,7 +211,7 @@ export class Morph implements MorphInterface {
    * Init parsers
    */
   private initParsers(): void {
-    this.parsers.dictonary = new DictionaryParser(this.thesaurus.words, this.thesaurus.paradigms, this.tags);
+    this.parsers.dictonary = new DictionaryParser(this.thesaurus.words, this.thesaurus.paradigms, this.tags, this.thesaurus.suffixes);
     this.parsers.abbr = new AbbrParser(this.thesaurus.grammemes);
     this.parsers.abbrName = new InitialsParser(this.thesaurus.grammemes, false, 0.1);
     this.parsers.abbrPatronymic = new InitialsParser(this.thesaurus.grammemes, true, 0.1)
@@ -225,7 +229,13 @@ export class Morph implements MorphInterface {
       /[A-Za-z\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u024f]$/,
       Tag.makeTag('LATN', 'ЛАТ', this.thesaurus.grammemes), 0.9);
 
-    this.parsers.hyphenParticle = new HyphenParticle(this.thesaurus.words, this.thesaurus.paradigms, this.tags);
-    this.parsers.hyphenAdverb = new HyphenAdverb(this.thesaurus.words, this.thesaurus.paradigms, this.tags, this.thesaurus.grammemes);
+    this.parsers.hyphenParticle = new HyphenParticle(this.thesaurus.words, this.thesaurus.paradigms, this.tags, this.thesaurus.suffixes);
+    this.parsers.hyphenAdverb = new HyphenAdverb(this.thesaurus.words, this.thesaurus.paradigms, this.tags,
+      this.thesaurus.grammemes, this.thesaurus.suffixes);
+
+    this.parsers.hyphenWords = new HyphenWords(<DictionaryParser> this.parsers.dictonary);
+    this.parsers.prefixKnown = new PrefixKnown(<DictionaryParser> this.parsers.dictonary);
+    this.parsers.suffixKnown = new SuffixKnown(this.thesaurus.paradigms, this.tags,
+      this.thesaurus.suffixes, this.thesaurus.predictionSuffixes);
   }
 }

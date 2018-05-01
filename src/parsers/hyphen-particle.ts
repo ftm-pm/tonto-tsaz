@@ -18,7 +18,7 @@ export class HyphenParticle implements ParserInterface {
   /**
    * Paradigms
    */
-  private readonly paradigms: any;
+  private readonly paradigms: any[];
 
   /**
    * Tags
@@ -26,16 +26,23 @@ export class HyphenParticle implements ParserInterface {
   private readonly tags: Tag[];
 
   /**
+   * Suffixes
+   */
+  private readonly suffixes: any[];
+
+  /**
    * Constructor HyphenParticle
    *
    * @param {DAWG} words
-   * @param paradigms
+   * @param {any[]} paradigms
    * @param {Tag[]} tags
+   * @param {any[]} suffixes
    */
-  public constructor(words: DAWG, paradigms: any, tags: Tag[]) {
+  public constructor(words: DAWG, paradigms: any[], tags: Tag[], suffixes: any[]) {
     this.words = words;
     this.paradigms = paradigms;
     this.tags = tags;
+    this.tags = suffixes;
   }
 
   public parse(word: string, config: any = {}): any {
@@ -50,6 +57,7 @@ export class HyphenParticle implements ParserInterface {
             const parse = DictionaryParse.createDictionaryParse(
               this.paradigms,
               this.tags,
+              this.suffixes,
               opts[i][0],
               opts[i][1][j][0],
               opts[i][1][j][1],
